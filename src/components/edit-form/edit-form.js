@@ -37,7 +37,7 @@ class EditForm extends Component {
             this.setState({error: "All fields should filled"});
             return;
         }
-        let error = this.sameName(this.state.name) || this.coordinatesError(this.state.coordinates);
+        let error = this.sameName(this.state.name) || (this.type === 'locations' && this.coordinatesError(this.state.coordinates));
         if(error) {
             this.setState({error});
             return;
@@ -50,7 +50,7 @@ class EditForm extends Component {
         for(let field in this.state){
             if(field === pass || field === 'isValid' || field === 'error' || field === 'initialCenter') continue;
             if(!this.state[field]) return false;
-            if(field === 'coordinates' && !this.coordinatesIsValid(this.state[field])) return false;
+            if(field === 'coordinates' && this.type === 'locations' && !this.coordinatesIsValid(this.state[field])) return false;
         }
         return true;
     }
@@ -71,7 +71,7 @@ class EditForm extends Component {
         } else {
             newData[this.type].push(newItem);
         }
-        newData[this.type].sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1);
+        newData[this.type].length > 1 && newData[this.type].sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1);
         return newData;
     }
     onChange = ({target: {name, value}}) => {
@@ -87,7 +87,7 @@ class EditForm extends Component {
         const isValid = this.checkValid('coordinates');
         this.setState({coordinates: lat + ', ' + lng, isValid});
     }
-    coordinatesIsValid = (coordinates) => coordinates.match(/^ *-?[0-9]+\.?[0-9]* *, *-?[0-9]+\.?[0-9]* *$/);
+    coordinatesIsValid = (coordinates) => coordinates && coordinates.match(/^ *-?[0-9]+\.?[0-9]* *, *-?[0-9]+\.?[0-9]* *$/);
     coordinatesError = (coordinates) => this.coordinatesIsValid(coordinates) ? null : 'The coordinates is NOT valid';
 
     renderAdditinalFields = () => {
