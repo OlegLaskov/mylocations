@@ -37,11 +37,13 @@ const View = (props) => {
     const initialCenter = getPositionFromString(item.coordinates);
     
     const Details = () => {
+        const {name, category, address, coordinates} = item;
+        const categoryStr = category && category.join(', ');
         return <Box p={3}>
-                <Typography>{item.name}</Typography>
-                <Typography>{item.category}</Typography>
-                <Typography>{item.address}</Typography>
-                <Typography>{item.coordinates}</Typography>
+                <Typography>{name}</Typography>
+                <Typography>{categoryStr}</Typography>
+                <Typography>{address}</Typography>
+                <Typography>{coordinates}</Typography>
         </Box>;
     }
     const ViewMap = () => {

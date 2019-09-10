@@ -4,9 +4,10 @@ import {bindActionCreators, compose} from 'redux';
 import {dataSaved} from '../../actions';
 import {withDataService} from '../hoc-helpers';
 import {Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button,
-    FormControl, InputLabel, Select, MenuItem, FormHelperText} from '@material-ui/core';
+    FormHelperText} from '@material-ui/core';
 import Icon from '../icon';
 import Map from '../map';
+import SelectCategory from '../select-category';
 
 class EditForm extends Component {
     state = {...this.props.item, isValid: false};
@@ -47,10 +48,14 @@ class EditForm extends Component {
         dataSaved(newData);
     }
     checkValid = (pass) => {
-        for(let field in this.state){
+        const {state, type, categoryIsValid, coordinatesIsValid} = this;
+        for(let field in state){
             if(field === pass || field === 'isValid' || field === 'error' || field === 'initialCenter') continue;
-            if(!this.state[field]) return false;
-            if(field === 'coordinates' && this.type === 'locations' && !this.coordinatesIsValid(this.state[field])) return false;
+            if(!state[field]) return false;
+            if(type === 'locations'){
+                if(field === 'category' && !categoryIsValid(state[field])) return false;
+                if(field === 'coordinates' && !coordinatesIsValid(state[field])) return false;
+            }
         }
         return true;
     }
@@ -83,6 +88,13 @@ class EditForm extends Component {
         }
         this.setState({[name]: value, isValid, error});
     }
+    setCategory = (category) => {
+        let isValid = this.categoryIsValid(category) && this.checkValid('category');
+        this.setState({category, isValid});
+    }
+    categoryIsValid =(category) => {
+        return category && category.length;
+    }
     coordinatesFromMap = (lat, lng) => {
         const isValid = this.checkValid('coordinates');
         this.setState({coordinates: lat + ', ' + lng, isValid});
@@ -94,7 +106,6 @@ class EditForm extends Component {
         const {data} = this.props;
         let additinalFields = null;
         if(this.type === 'locations' && data.categories){
-            const categoryList = data.categories.map(({name}) => <MenuItem key={name} value={name}>{name}</MenuItem> );
             const {name, address, coordinates, category, initialCenter} = this.state;
             let marker;
             if(coordinates && this.coordinatesIsValid(coordinates)){
@@ -102,19 +113,7 @@ class EditForm extends Component {
                 marker = {lat: coordArray[0], lng: coordArray[1]};
             }
             additinalFields = <React.Fragment>
-                <FormControl required fullWidth className ="input">
-                    <InputLabel htmlFor="category">Category</InputLabel>
-                    <Select 
-                        value={category}
-                        onChange={this.onChange}
-                        name="category"
-                        inputProps={{
-                            id: 'category',
-                        }}
-                        >
-                        {categoryList}
-                    </Select>
-                </FormControl>
+                <SelectCategory categories={data.categories} setCategory={this.setCategory} value={category} isEditForm={true} />
                 <TextField required margin="dense" name="address" label="Address" type="text" fullWidth 
                     onChange={this.onChange} defaultValue={address}
                 />

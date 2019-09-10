@@ -3,12 +3,13 @@ import {Route, Redirect, withRouter} from 'react-router-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux';
 import {addItem, editItem, removeItem, view, setGroupByCategory, setCategoryFilter} from '../../actions';
-import {CssBaseline, Typography, Container, Button, FormGroup, FormControlLabel, Checkbox, FormControl, InputLabel, Select, MenuItem, Input} from '@material-ui/core';
+import {CssBaseline, Typography, Container, Button, FormGroup, FormControlLabel, Checkbox} from '@material-ui/core';
 import ItemList from '../item-list';
 import BottomBar from '../bottom-bar';
 import EditForm from '../edit-form';
 import RemoveDialog from '../remove-dialog';
 import View from '../view';
+import SelectCategory from '../select-category';
 import './app.css';
 
 class App extends Component {
@@ -21,17 +22,6 @@ class App extends Component {
             editItem, removeItem, view, setGroupByCategory, setCategoryFilter} = this.props;
         let modalWindow = null, filterPanel = null;
         if(data && data.categories && type === 'locations'){
-            const categoryList = data.categories.map(({name}) => <MenuItem key={name} value={name}>{name}</MenuItem> );
-            const ITEM_HEIGHT = 48;
-            const ITEM_PADDING_TOP = 8;
-            const MenuProps = {
-                PaperProps: {
-                    style: {
-                        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
-                        width: 250,
-                    },
-                },
-            };
             filterPanel = <div className="filter-panel">
                 <Container maxWidth="sm">
                     <FormGroup className="filter-panel-group">
@@ -42,18 +32,7 @@ class App extends Component {
                                 }
                                 label="Group by category"
                             />
-                            <FormControl className ="input">
-                                <InputLabel htmlFor="category">Category</InputLabel>
-                                <Select multiple
-                                    value={categoryFilter}
-                                    onChange={(e) => setCategoryFilter(e.target.value)}
-                                    name="category"
-                                    input={<Input id="select-multiple" />}
-                                    MenuProps={MenuProps}
-                                    >
-                                    {categoryList}
-                                </Select>
-                            </FormControl>
+                            <SelectCategory categories={data.categories} setCategory={setCategoryFilter} value={categoryFilter} />
                         </div>
                     </FormGroup>
                 </Container>
@@ -83,7 +62,7 @@ class App extends Component {
             } else {
                 onClose = () => {addItem(false)};
                 if(type === 'locations'){
-                    item = {...item, category: "", address: "", coordinates: ""};
+                    item = {...item, category: [], address: "", coordinates: ""};
                 } else item.name = "";
             } 
             modalWindow = <EditForm ind={ind} item={item} onClose={onClose} type={type} />;

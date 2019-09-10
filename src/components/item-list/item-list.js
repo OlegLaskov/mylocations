@@ -30,7 +30,7 @@ class ItemList extends Component {
             if(type === 'locations'){
 
                 if(categoryFilter.length > 0){
-                    items = items.filter(({category}) => categoryFilter.indexOf(category) !== -1);
+                    items = items.filter(({category}) => category.filter((value) => categoryFilter.indexOf(value) !== -1).length > 0);
                 } else {
                     items = [...items];
                 }
@@ -46,9 +46,9 @@ class ItemList extends Component {
             }
             itemList = items.map(({name, category}) => {
                 let className = id === name ? "list-group-item selected-item " : "list-group-item ";
-                
+                const categoryStr = category ? category.join(', ') : null;
                 const content = type === 'locations' ? <div className={type}><div>{name}</div>
-                    <div>{category}</div></div> : <div className={type}><div>{name}</div></div>;
+                    <div>{categoryStr}</div></div> : <div className={type}><div>{name}</div></div>;
 
                 return <Link className="link" key={name} to={encodeURIComponent(name)}>
                     <li className={className}>{content}</li>
